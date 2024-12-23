@@ -1,0 +1,54 @@
+dvc 
+started dvc 
+1 - dvc init in the folder
+
+#add the raw data so that git doesnt track the raw data 
+2 - dvc add data/raw/data.csv
+# add the dvc generated files 
+3 - git add gitignore and data.csv.dvc file
+4 - git commit - m "msg"
+
+# preparing pipelines dvc stages
+
+dvc stage add -n preprocess \
+-p preproces.input,preprocess.output \
+-d src/preprocess.py -d data/raw/data.csv \
+-o data/processed/data.csv \
+python src/preprocess.py
+
+-n is new stage
+-p tracks the parameter which are available - input and output files
+-d it specifies the dependiencies 
+-o specifies the output of the stage
+
+training pipeline
+
+- dvc stage add -n train \
+-p train.data, train.model, train.random_state,train.n_estimators,train.max_depth \
+-d src/train.py -d data/raw/data.csv \
+-o models/model.pkl \
+python src/train.py
+
+evaluation 
+
+- dvc stage add -n evaluation \
+-d src/evaluate.py -d models/model.pkl -d data/raw/data/csv \
+python src/evaluate.py
+
+to run this entire pipeline use dvc repro it runs the entire pipeline
+- dvc repro 
+
+Add dvc remote origin 
+-dvc remote add origin s3://dvc
+-dvc remote modify origin endpointurl https://dagshub.com/sarankoundinya2000/MLentirepipeline.s3
+Providing access to dvc - providing secret token
+-dvc remote modify origin --local access_key_id 2430ca85e11f45f08480a346ab0359e44eb7e8b0        
+-dvc remote modify origin --local secret_access_key 2430ca85e11f45f08480a346ab0359e44eb7e8b0 
+And then finally as we already have added files
+-dvc pull -r origin 
+And then push
+-dvc push -r origin
+# adding all the files
+-git add . 
+-git commit -m “final changes”
+-git push origin main 
